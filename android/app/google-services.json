@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1006738085803",
+    "project_id": "firestore-63319",
+    "storage_bucket": "firestore-63319.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006738085803:android:60a81915e59da85fb664ee",
+        "android_client_info": {
+          "package_name": "com.example.ice_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006738085803-dk6tkqe1jve4gjq7dgrds81g7nrci51o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkEsPiUi7Hec5BEh0pdabGEOBXcTgZh5g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006738085803-dk6tkqe1jve4gjq7dgrds81g7nrci51o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
