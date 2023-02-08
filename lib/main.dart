@@ -52,8 +52,6 @@ class MyApp extends StatelessWidget {
 class Check extends StatelessWidget {
   Future<FirebaseApp> _initializeFirebase() async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    CollectionReference users = firestore.collection('user');
     User? user = FirebaseAuth.instance.currentUser;
     try {
       if (user != null) {

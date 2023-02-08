@@ -1,28 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:encrypt/encrypt.dart' as enc;
 import 'package:intl/intl.dart';
-import '../model/user.dart';
-import '../utils/funtions.dart';
+
 import '../utils/globals.dart' as globals;
+import 'package:encrypt/encrypt.dart' as enc;
+
+import '../model/user.dart';
+import '../service/database.dart';
+import '../utils/funtions.dart';
 import '../view/home.dart';
 import '../view/login_mobile.dart';
 
-class DataBaseServices {
-  Future<void> downloadUrlEx(String loc) async {
-    await FirebaseStorage.instance.ref().child('$loc').getDownloadURL();
-  }
-
-  Future<void> deleteImage(String loc) async {
-    await FirebaseStorage.instance.ref().storage.refFromURL(loc).delete();
-  }
+class Controller extends GetxController {
+  var count = 0.obs;
+  var isLogin = false.obs;
+  final category = Rxn<String>();
+  var selectedPages = 0.obs;
 
   Future<void> loginAuth(
       BuildContext context, String email, String password) async {
@@ -209,5 +208,13 @@ class DataBaseServices {
     } on FirebaseAuthException catch (e) {
       showNotification(context, e.message!);
     }
+  }
+
+  void increment() {
+    count++;
+  }
+
+  void decrement() {
+    count--;
   }
 }

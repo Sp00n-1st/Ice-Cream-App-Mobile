@@ -3,40 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../utils/globals.dart' as globals;
+import 'package:ice_mobile/controller/controller.dart';
 import '../service/database.dart';
 import '../utils/funtions.dart';
 import 'register_mobile.dart';
 
-class LoginPageMobile extends StatefulWidget {
-  @override
-  State<LoginPageMobile> createState() => _LoginPageMobileState();
-}
-
-class _LoginPageMobileState extends State<LoginPageMobile> {
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
+// ignore: must_be_immutable
+class LoginPageMobile extends StatelessWidget {
   double getWidthImage(BuildContext context) =>
       MediaQuery.of(context).size.width * 1;
-
   double getHeightImage(BuildContext context) =>
       MediaQuery.of(context).size.height * 1;
-
   String? email;
-
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  var controller = Get.put(Controller());
 
   @override
   Widget build(BuildContext context) {
@@ -207,62 +188,54 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                               ),
                               Center(
                                 child: Container(
-                                    margin: EdgeInsets.only(top: 20),
-                                    width: getWidthImage(context) / 2,
-                                    height: 50,
-                                    child: StatefulBuilder(
-                                      builder: (context, setState) => SizedBox(
-                                        width: getWidthImage(context) / 6,
-                                        height: getHeightImage(context) * 0.06,
-                                        child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                                shape: const StadiumBorder()),
-                                            onPressed: () async {
-                                              if (FirebaseAuth
-                                                      .instance.currentUser ==
-                                                  null) {
-                                                try {
-                                                  setState(
-                                                    () {
-                                                      globals.isLogin =
-                                                          !globals.isLogin;
-                                                    },
-                                                  );
-                                                  await DataBaseServices()
-                                                      .loginAuth(
-                                                          context,
-                                                          emailController.text,
-                                                          passwordController
-                                                              .text);
-                                                } on FirebaseAuthException catch (e) {
-                                                  setState(
-                                                    () {
-                                                      globals.isLogin =
-                                                          !globals.isLogin;
-                                                    },
-                                                  );
-                                                  showNotification(context,
-                                                      e.message.toString());
-                                                }
-                                              } else {
-                                                await FirebaseAuth.instance
-                                                    .signOut();
+                                  margin: EdgeInsets.only(top: 20),
+                                  width: getWidthImage(context) / 2,
+                                  height: 50,
+                                  child: Obx(
+                                    () => SizedBox(
+                                      width: getWidthImage(context) / 6,
+                                      height: getHeightImage(context) * 0.06,
+                                      child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              shape: const StadiumBorder()),
+                                          onPressed: () async {
+                                            if (FirebaseAuth
+                                                    .instance.currentUser ==
+                                                null) {
+                                              try {
+                                                controller.isLogin.value =
+                                                    !controller.isLogin.value;
+                                                await DataBaseServices()
+                                                    .loginAuth(
+                                                        context,
+                                                        emailController.text,
+                                                        passwordController
+                                                            .text);
+                                              } on FirebaseAuthException catch (e) {
+                                                controller.isLogin.value =
+                                                    !controller.isLogin.value;
+                                                showNotification(context,
+                                                    e.message.toString());
                                               }
-                                            },
-                                            child: (globals.isLogin == false)
-                                                ? Text(
-                                                    'Login',
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 18),
-                                                  )
-                                                : const CircularProgressIndicator(
-                                                    color: Colors.black,
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                  )),
-                                      ),
-                                    )),
-                              ),
+                                            } else {
+                                              await FirebaseAuth.instance
+                                                  .signOut();
+                                            }
+                                          },
+                                          child: (controller.isLogin.isFalse)
+                                              ? Text(
+                                                  'Login',
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 18),
+                                                )
+                                              : const CircularProgressIndicator(
+                                                  color: Colors.black,
+                                                  backgroundColor: Colors.white,
+                                                )),
+                                    ),
+                                  ),
+                                ),
+                              )
                             ],
                           )),
                     ),

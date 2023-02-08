@@ -2,30 +2,16 @@ import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ice_mobile/controller/controller.dart';
 import '../model/product.dart';
 import '../service/database.dart';
 import '../view_model/list_product.dart';
 
-class MainPageMobile extends StatefulWidget {
-  @override
-  State<MainPageMobile> createState() => _MainPageMobileState();
-}
-
-class _MainPageMobileState extends State<MainPageMobile> {
-  @override
-  void dispose() {
-    searchText.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    searchText.clear();
-    super.initState();
-  }
-
-  String? category;
+// ignore: must_be_immutable
+class MainPageMobile extends StatelessWidget {
+  var controller = Get.put(Controller());
   String? name;
   String? imageProfile;
   TextEditingController searchText = TextEditingController();
@@ -36,7 +22,6 @@ class _MainPageMobileState extends State<MainPageMobile> {
     final auth = FirebaseAuth.instance.currentUser!.uid;
     Query<Product> products = firestore
         .collection('product')
-        .where('category', isEqualTo: category)
         .withConverter<Product>(
             fromFirestore: (snapshot, _) => Product.fromJson(snapshot.data()),
             toFirestore: (product, _) => product.toJson());
@@ -142,25 +127,15 @@ class _MainPageMobileState extends State<MainPageMobile> {
                         ButtonsTabBar(
                           onTap: (position) {
                             if (position == 0) {
-                              setState(() {
-                                category = null;
-                              });
+                              controller.category.value = null;
                             } else if (position == 1) {
-                              setState(() {
-                                category = 'Gelato';
-                              });
+                              controller.category.value = 'Gelato';
                             } else if (position == 2) {
-                              setState(() {
-                                category = 'Ice Stick';
-                              });
+                              controller.category.value = 'Ice Stick';
                             } else if (position == 3) {
-                              setState(() {
-                                category = 'Sundae';
-                              });
+                              controller.category.value = 'Sundae';
                             } else if (position == 4) {
-                              setState(() {
-                                category = 'Ice Cone';
-                              });
+                              controller.category.value = 'Ice Cone';
                             }
                           },
                           buttonMargin:
@@ -250,56 +225,59 @@ class _MainPageMobileState extends State<MainPageMobile> {
                 ),
               ),
             ),
-            StreamBuilder(
-                stream: products
-                    .orderBy('nameProduct', descending: false)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                        width: 100,
-                        height: 100,
-                        margin: const EdgeInsets.only(top: 130),
-                        child: const CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData) {
-                    return const Text('kosong');
-                  }
+            Obx(
+              () => StreamBuilder(
+                  stream: products
+                      .orderBy('nameProduct', descending: false)
+                      .where('category', isEqualTo: controller.category.value)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(snapshot.error.toString()),
+                      );
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container(
+                          width: 100,
+                          height: 100,
+                          margin: const EdgeInsets.only(top: 130),
+                          child: const CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData) {
+                      return const Text('kosong');
+                    }
 
-                  final data = snapshot.requireData;
-                  return data.size != 0
-                      ? Container(
-                          margin: const EdgeInsets.all(10),
-                          padding: const EdgeInsets.only(bottom: 50),
-                          width: 370,
-                          height: 420,
-                          child: GridView.builder(
-                            itemCount: data.size,
-                            gridDelegate:
-                                const SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 200,
-                                    //childAspectRatio: 3 / 2,
-                                    crossAxisSpacing: 5,
-                                    mainAxisSpacing: 5),
-                            itemBuilder: (context, index) => ListProduct(
-                              product: data.docs[index].data(),
-                              imageProfile: imageProfile,
-                              idProduct: data.docs[index].id,
-                            ),
-                          ))
-                      : const SizedBox(
-                          width: 600,
-                          height: 400,
-                          child: Image(
-                            image: AssetImage('assets/nodata6.gif'),
-                            fit: BoxFit.fill,
-                          ));
-                }),
+                    final data = snapshot.requireData;
+                    return data.size != 0
+                        ? Container(
+                            margin: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.only(bottom: 50),
+                            width: 370,
+                            height: 420,
+                            child: GridView.builder(
+                              itemCount: data.size,
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: 200,
+                                      //childAspectRatio: 3 / 2,
+                                      crossAxisSpacing: 5,
+                                      mainAxisSpacing: 5),
+                              itemBuilder: (context, index) => ListProduct(
+                                product: data.docs[index].data(),
+                                imageProfile: imageProfile,
+                                idProduct: data.docs[index].id,
+                              ),
+                            ))
+                        : const SizedBox(
+                            width: 600,
+                            height: 400,
+                            child: Image(
+                              image: AssetImage('assets/nodata6.gif'),
+                              fit: BoxFit.fill,
+                            ));
+                  }),
+            ),
           ],
         ),
       ),

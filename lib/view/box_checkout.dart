@@ -2,15 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'home.dart';
-import '../bloc/counter_bloc.dart';
 import '../model/cart.dart';
 import '../model/product.dart';
 
+// ignore: must_be_immutable
 class BoxCheckout extends StatelessWidget {
   double getWidth(BuildContext context) =>
       MediaQuery.of(context).size.width * 1;
@@ -30,9 +29,6 @@ class BoxCheckout extends StatelessWidget {
   List<String> idProduct2 = <String>[];
   @override
   Widget build(BuildContext context) {
-    List<int> qty;
-    List<num> total, discount, subTotal;
-    final firebase = FirebaseFirestore.instance;
     final auth = FirebaseAuth.instance.currentUser!.uid;
     num subTotal2;
     num discount2;
@@ -40,137 +36,119 @@ class BoxCheckout extends StatelessWidget {
 
     subTotal2 = cart * price;
     discount2 = (cart * price) * 0.10;
-    final cartRef = firebase.collection('cart').doc(auth);
-    return BlocProvider(
-      create: (context) => CounterBloc(),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-        padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-        width: double.infinity,
-        height: getHeight(context) / 14,
-        child: BlocBuilder<CounterBloc, CounterState>(
-          builder: (context, state) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+      width: double.infinity,
+      height: getHeight(context) / 14,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            flex: 3,
+            child: Column(
               children: [
-                Flexible(
-                  flex: 3,
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Subtotal',
-                              style: GoogleFonts.roboto(
-                                  fontSize: getWidth(context) / 30,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500)),
-                          BlocBuilder<CounterBloc, CounterState>(
-                            builder: (context, state) {
-                              return Text(
-                                  NumberFormat.currency(
-                                          locale: 'en', symbol: '£ ')
-                                      .format(subTotal2),
-                                  style: GoogleFonts.roboto(
-                                      fontSize: getWidth(context) / 30,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500));
-                            },
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Discount',
-                              style: GoogleFonts.roboto(
-                                  fontSize: getWidth(context) / 30,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500)),
-                          Text(
-                              (cart < 5)
-                                  ? '0'
-                                  : NumberFormat.currency(
-                                          locale: 'en', symbol: '£ ')
-                                      .format(discount2),
-                              style: GoogleFonts.roboto(
-                                  fontSize: getWidth(context) / 30,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500))
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Total',
-                              style: GoogleFonts.roboto(
-                                  fontSize: getWidth(context) / 30,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500)),
-                          Text(
-                              (cart < 5)
-                                  ? NumberFormat.currency(
-                                          locale: 'en', symbol: '£ ')
-                                      .format(total2 = cart * price)
-                                  : NumberFormat.currency(
-                                          locale: 'en', symbol: '£ ')
-                                      .format(total2 = (cart * price) -
-                                          ((cart * price) * 0.10)),
-                              style: GoogleFonts.roboto(
-                                  fontSize: getWidth(context) / 30,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500))
-                        ],
-                      ),
-                    ],
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Subtotal',
+                        style: GoogleFonts.roboto(
+                            fontSize: getWidth(context) / 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500)),
+                    Text(
+                        NumberFormat.currency(locale: 'en', symbol: '£ ')
+                            .format(subTotal2),
+                        style: GoogleFonts.roboto(
+                            fontSize: getWidth(context) / 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500))
+                  ],
                 ),
-                Flexible(
-                    flex: 1,
-                    child: Container(
-                        margin: const EdgeInsets.only(left: 10),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await FirebaseFirestore.instance
-                                .collection('cart')
-                                .doc(auth)
-                                .withConverter<CartModel>(
-                                    fromFirestore: (snapshot, _) =>
-                                        CartModel.fromJson(snapshot.data()),
-                                    toFirestore: (cartModel, _) =>
-                                        cartModel.toJson())
-                                .get()
-                                .then((DocumentSnapshot<CartModel>
-                                    documentSnapshot) {
-                              if (documentSnapshot.exists) {
-                                return add(
-                                    documentSnapshot.data(),
-                                    subTotal2,
-                                    discount2,
-                                    total2,
-                                    price,
-                                    cart,
-                                    idProduct,
-                                    auth,
-                                    context);
-                              } else {
-                                return addFirst(subTotal2, discount2, total2,
-                                    price, cart, idProduct, auth, context);
-                              }
-                            });
-                          },
-                          child: SizedBox(
-                              height: 60,
-                              width: 50,
-                              child: Icon(
-                                CupertinoIcons.cart_fill_badge_plus,
-                                size: 35,
-                              )),
-                        )))
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Discount',
+                        style: GoogleFonts.roboto(
+                            fontSize: getWidth(context) / 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500)),
+                    Text(
+                        (cart < 5)
+                            ? '0'
+                            : NumberFormat.currency(locale: 'en', symbol: '£ ')
+                                .format(discount2),
+                        style: GoogleFonts.roboto(
+                            fontSize: getWidth(context) / 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500))
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Total',
+                        style: GoogleFonts.roboto(
+                            fontSize: getWidth(context) / 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500)),
+                    Text(
+                        (cart < 5)
+                            ? NumberFormat.currency(locale: 'en', symbol: '£ ')
+                                .format(total2 = cart * price)
+                            : NumberFormat.currency(locale: 'en', symbol: '£ ')
+                                .format(total2 =
+                                    (cart * price) - ((cart * price) * 0.10)),
+                        style: GoogleFonts.roboto(
+                            fontSize: getWidth(context) / 30,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500))
+                  ],
+                ),
               ],
-            );
-          },
-        ),
+            ),
+          ),
+          Flexible(
+              flex: 1,
+              child: Container(
+                  margin: const EdgeInsets.only(left: 10),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseFirestore.instance
+                          .collection('cart')
+                          .doc(auth)
+                          .withConverter<CartModel>(
+                              fromFirestore: (snapshot, _) =>
+                                  CartModel.fromJson(snapshot.data()),
+                              toFirestore: (cartModel, _) => cartModel.toJson())
+                          .get()
+                          .then((DocumentSnapshot<CartModel> documentSnapshot) {
+                        if (documentSnapshot.exists) {
+                          return add(
+                              documentSnapshot.data(),
+                              subTotal2,
+                              discount2,
+                              total2,
+                              price,
+                              cart,
+                              idProduct,
+                              auth,
+                              context);
+                        } else {
+                          return addFirst(subTotal2, discount2, total2, price,
+                              cart, idProduct, auth, context);
+                        }
+                      });
+                    },
+                    child: SizedBox(
+                        height: 60,
+                        width: 50,
+                        child: Icon(
+                          CupertinoIcons.cart_fill_badge_plus,
+                          size: 35,
+                        )),
+                  )))
+        ],
       ),
     );
   }
