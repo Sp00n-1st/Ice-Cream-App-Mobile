@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ice_mobile/controller/controller.dart';
-import '../service/database.dart';
-import '../utils/funtions.dart';
+import '../controller/auth_controller.dart';
+import '../controller/controller.dart';
 import 'register_mobile.dart';
 
 // ignore: must_be_immutable
@@ -18,6 +17,7 @@ class LoginPageMobile extends StatelessWidget {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   var controller = Get.put(Controller());
+  var authController = Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +175,7 @@ class LoginPageMobile extends StatelessWidget {
                                               .sendPasswordResetEmail(
                                                   email: '');
                                         } on FirebaseAuthException catch (e) {
-                                          showNotification(
+                                          controller.showNotification(
                                               context, e.message.toString());
                                         }
                                       },
@@ -203,18 +203,19 @@ class LoginPageMobile extends StatelessWidget {
                                                     .instance.currentUser ==
                                                 null) {
                                               try {
-                                                controller.isLogin.value =
-                                                    !controller.isLogin.value;
-                                                await DataBaseServices()
-                                                    .loginAuth(
-                                                        context,
-                                                        emailController.text,
-                                                        passwordController
-                                                            .text);
+                                                authController.isLogin.value =
+                                                    !authController
+                                                        .isLogin.value;
+                                                await authController.loginAuth(
+                                                    context,
+                                                    emailController.text,
+                                                    passwordController.text);
                                               } on FirebaseAuthException catch (e) {
-                                                controller.isLogin.value =
-                                                    !controller.isLogin.value;
-                                                showNotification(context,
+                                                authController.isLogin.value =
+                                                    !authController
+                                                        .isLogin.value;
+                                                controller.showNotification(
+                                                    context,
                                                     e.message.toString());
                                               }
                                             } else {
@@ -222,7 +223,8 @@ class LoginPageMobile extends StatelessWidget {
                                                   .signOut();
                                             }
                                           },
-                                          child: (controller.isLogin.isFalse)
+                                          child: (authController
+                                                  .isLogin.isFalse)
                                               ? Text(
                                                   'Login',
                                                   style: GoogleFonts.poppins(

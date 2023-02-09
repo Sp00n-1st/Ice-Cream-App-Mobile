@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oktoast/oktoast.dart';
+import '../controller/auth_controller.dart';
+import '../controller/password_controller.dart';
 import '../model/user.dart';
-import '../service/database.dart';
 import 'edit_profile.dart';
 
 // ignore: must_be_immutable
 class Profile extends StatelessWidget {
+  var authController = Get.put(AuthController());
+  var passController = Get.put(PasswordController());
   UserAccount userAccount;
   Profile({super.key, required this.userAccount});
   TextEditingController currentPassword = TextEditingController();
@@ -202,7 +205,7 @@ class Profile extends StatelessWidget {
                                   passwordRepeatController.text.isNotEmpty) {
                                 if (passwordNewController.text ==
                                     passwordRepeatController.text) {
-                                  DataBaseServices().changePassword(
+                                  passController.changePassword(
                                       context,
                                       userAccount,
                                       currentPassword.text,
@@ -267,7 +270,7 @@ class Profile extends StatelessWidget {
                       ),
                       MaterialButton(
                         onPressed: () {
-                          DataBaseServices().logoutAuth(true);
+                          authController.logoutAuth(true);
                           Navigator.pop(context);
                         },
                         child: Text(

@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ice_mobile/controller/controller.dart';
 import 'package:water_drop_nav_bar/water_drop_nav_bar.dart';
+import '../controller/auth_controller.dart';
 import '../model/user.dart';
-import '../service/database.dart';
 import 'cart_pages.dart';
 import 'main_page_mobile.dart';
 import 'order_page.dart';
@@ -15,11 +15,10 @@ import 'profile.dart';
 
 // ignore: must_be_immutable
 class MyHomePage extends StatelessWidget {
-  DataBaseServices dataBaseServices = DataBaseServices();
   final Color navigationBarColor = Colors.white;
   PageController? pageController;
-  int selectedIndex = 0;
   var controller = Get.put(Controller());
+  var authController = Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +41,13 @@ class MyHomePage extends StatelessWidget {
       stream: user.doc(auth).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          DataBaseServices().logoutAuth(false);
+          authController.logoutAuth(false);
         } else if (snapshot.connectionState == ConnectionState.waiting) {
           Center(
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.data!['isDisable'] == true) {
-          DataBaseServices().logoutAuth(false);
+          authController.logoutAuth(false);
         }
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
@@ -67,7 +66,7 @@ class MyHomePage extends StatelessWidget {
                     stream: users.snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        DataBaseServices().logoutAuth(false);
+                        authController.logoutAuth(false);
                       } else if (snapshot.connectionState ==
                           ConnectionState.waiting) {
                         return Center(
@@ -87,6 +86,7 @@ class MyHomePage extends StatelessWidget {
                   pageController!.animateToPage(controller.selectedPages.value,
                       duration: const Duration(milliseconds: 400),
                       curve: Curves.easeOutQuad);
+                  print(controller.selectedPages.value);
                 },
                 selectedIndex: controller.selectedPages.value,
                 barItems: <BarItem>[

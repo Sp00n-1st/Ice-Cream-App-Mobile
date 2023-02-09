@@ -6,18 +6,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ice_mobile/controller/photo_controller.dart';
 import 'package:oktoast/oktoast.dart';
+import '../controller/controller.dart';
+import '../controller/password_controller.dart';
+import '../controller/photo_controller.dart';
 import '../model/user.dart';
-import '../service/database.dart';
-import '../utils/funtions.dart';
 
 // ignore: must_be_immutable
 class EditProfile extends StatelessWidget {
   UserAccount userAccount;
   EditProfile({super.key, required this.userAccount});
 
-  var controller = Get.put(PhotoC());
+  var photoController = Get.put(PhotoC());
+  var passController = Get.put(PasswordController());
+  var controller = Get.put(Controller());
   String? imageSave;
   final auth = FirebaseAuth.instance.currentUser!.uid;
   final emailUpdate = FirebaseAuth.instance.currentUser;
@@ -28,7 +30,7 @@ class EditProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    controller.pathImage.value = '';
+    photoController.pathImage.value = '';
     firstName.text = userAccount.firstName;
     lastName.text = userAccount.lastName;
     email.text = userAccount.email;
@@ -55,15 +57,15 @@ class EditProfile extends StatelessWidget {
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Obx(() {
               return MaterialButton(
-                onPressed: controller.pickPhotoFromGallery,
+                onPressed: photoController.pickPhotoFromGallery,
                 child: Container(
                   margin: const EdgeInsets.only(top: 0),
                   child: Center(
-                      child: (controller.pathImage.value != '')
+                      child: (photoController.pathImage.value != '')
                           ? CircleAvatar(
                               radius: 100,
                               backgroundImage: FileImage(
-                                  File(controller.pathImage.toString())))
+                                  File(photoController.pathImage.toString())))
                           : CircleAvatar(
                               radius: 100,
                               backgroundImage: userAccount.imageProfile == null
@@ -159,26 +161,28 @@ class EditProfile extends StatelessWidget {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           shape: const StadiumBorder()),
-                      onPressed: (controller.uploading.isTrue)
+                      onPressed: (photoController.uploading.isTrue)
                           ? null
                           : () async {
                               if (firstName.text.isNotEmpty &&
                                   lastName.text.isNotEmpty &&
                                   email.text.isNotEmpty) {
                                 try {
-                                  controller.uploading.value =
-                                      !controller.uploading.value;
-                                  print(controller.uploading);
+                                  photoController.uploading.value =
+                                      !photoController.uploading.value;
+                                  print(photoController.uploading);
                                   await emailUpdate!.updateEmail(email.text);
-                                  await controller.upload();
-                                  if (controller.pathImage == '' &&
+                                  await photoController.upload();
+                                  if (photoController.pathImage == '' &&
                                       userAccount.imageProfile != null) {
                                     imageSave = userAccount.imageProfile;
-                                  } else if (controller.pathImage != '' &&
+                                  } else if (photoController.pathImage != '' &&
                                       userAccount.imageProfile != null) {
-                                    imageSave = controller.downloadUrl.value;
-                                  } else if (controller.pathImage != '') {
-                                    imageSave = controller.downloadUrl.value;
+                                    imageSave =
+                                        photoController.downloadUrl.value;
+                                  } else if (photoController.pathImage != '') {
+                                    imageSave =
+                                        photoController.downloadUrl.value;
                                   }
                                   user.doc(auth).update(({
                                         'email': email.text,
@@ -194,24 +198,26 @@ class EditProfile extends StatelessWidget {
                                     print('cred');
                                     final cred = EmailAuthProvider.credential(
                                         email: userAccount.email,
-                                        password: DataBaseServices()
-                                            .decryptedPass(
-                                                userAccount.password));
-
+                                        password: passController.decryptedPass(
+                                            userAccount.password));
                                     await emailUpdate!
                                         .reauthenticateWithCredential(cred);
                                     await emailUpdate!.updateEmail(email.text);
-                                    await controller.upload();
-                                    if (controller.pathImage == '' &&
+                                    await photoController.upload();
+                                    if (photoController.pathImage == '' &&
                                         userAccount.imageProfile != null) {
                                       imageSave = userAccount.imageProfile;
-                                    } else if (controller.pathImage != '' &&
+                                    } else if (photoController.pathImage !=
+                                            '' &&
                                         userAccount.imageProfile != null) {
                                       // await DataBaseServices().deleteImage(
                                       //     widget.userAccount.imageProfile!);
-                                      imageSave = controller.downloadUrl.value;
-                                    } else if (controller.pathImage != '') {
-                                      imageSave = controller.downloadUrl.value;
+                                      imageSave =
+                                          photoController.downloadUrl.value;
+                                    } else if (photoController.pathImage !=
+                                        '') {
+                                      imageSave =
+                                          photoController.downloadUrl.value;
                                     }
                                     user.doc(auth).update(({
                                           'email': email.text,
@@ -220,12 +226,12 @@ class EditProfile extends StatelessWidget {
                                           'lastName': lastName.text
                                         }));
                                     Get.back();
-                                    controller.uploading.value =
-                                        !controller.uploading.value;
+                                    photoController.uploading.value =
+                                        !photoController.uploading.value;
                                   } else {
-                                    controller.uploading.value =
-                                        !controller.uploading.value;
-                                    showNotification(
+                                    photoController.uploading.value =
+                                        !photoController.uploading.value;
+                                    controller.showNotification(
                                         context, e.message.toString());
                                   }
                                 }
@@ -237,7 +243,7 @@ class EditProfile extends StatelessWidget {
                                         align: Alignment.bottomCenter));
                               }
                             },
-                      child: !controller.uploading.isTrue
+                      child: !photoController.uploading.isTrue
                           ? Text(
                               'Save',
                               style: GoogleFonts.poppins(fontSize: 16),

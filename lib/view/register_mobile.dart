@@ -1,17 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oktoast/oktoast.dart';
+import '../controller/auth_controller.dart';
+import '../controller/controller.dart';
+import '../controller/createUser_controller.dart';
+import '../controller/password_controller.dart';
 
-import '../service/database.dart';
-import '../utils/funtions.dart';
-import '../utils/globals.dart' as globals;
-
+// ignore: must_be_immutable
 class RegisterMobile extends StatelessWidget {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
+  var createController = Get.put(CreateUserController());
+  var authController = Get.put(AuthController());
+  var passController = Get.put(PasswordController());
+  var controller = Get.put(Controller());
   @override
   Widget build(BuildContext context) {
     double sizeWidth = MediaQuery.of(context).size.width;
@@ -153,9 +159,9 @@ class RegisterMobile extends StatelessWidget {
                   SizedBox(
                     height: 20,
                   ),
-                  StatefulBuilder(
-                    builder: (_, setState) {
-                      return (globals.isLogin == false)
+                  Obx(
+                    () {
+                      return (authController.isLogin.isFalse)
                           ? Center(
                               child: Material(
                                 borderRadius: BorderRadius.circular(20),
@@ -189,29 +195,28 @@ class RegisterMobile extends StatelessWidget {
                                             passwordController
                                                 .text.isNotEmpty) {
                                           try {
-                                            setState(() {
-                                              globals.isLogin =
-                                                  !globals.isLogin;
-                                            });
-                                            await DataBaseServices()
+                                            authController.isLogin.value =
+                                                !authController.isLogin.value;
+                                            await createController
                                                 .createUserWithEmail(
                                                     emailController.text,
                                                     passwordController.text,
-                                                    DataBaseServices()
-                                                        .encryptPass(
-                                                            passwordController
-                                                                .text),
+                                                    passController.encryptPass(
+                                                        passwordController
+                                                            .text),
                                                     firstNameController.text,
                                                     lastNameController.text,
                                                     null,
                                                     null,
                                                     context);
+                                            firstNameController.clear();
+                                            lastNameController.clear();
+                                            emailController.clear();
+                                            passwordController.clear();
                                           } on FirebaseAuthException catch (e) {
-                                            setState(() {
-                                              globals.isLogin =
-                                                  !globals.isLogin;
-                                            });
-                                            showNotification(
+                                            authController.isLogin.value =
+                                                !authController.isLogin.value;
+                                            controller.showNotification(
                                                 context, e.message.toString());
                                           }
                                         } else {

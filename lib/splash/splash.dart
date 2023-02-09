@@ -1,31 +1,8 @@
-import 'dart:async';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ice_mobile/main.dart';
 
-class Splash extends StatefulWidget {
-  @override
-  State<Splash> createState() => _SplashState();
-}
-
-class _SplashState extends State<Splash> {
-  void route() {
-    Get.offAll(Check());
-  }
-
-  initialRoute() {
-    var duration = Duration(milliseconds: 3500);
-    return Timer(duration, route);
-  }
-
-  @override
-  void initState() {
-    initialRoute();
-    super.initState();
-  }
-
+class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

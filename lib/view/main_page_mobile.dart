@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ice_mobile/controller/controller.dart';
+import '../controller/auth_controller.dart';
 import '../model/product.dart';
-import '../service/database.dart';
 import '../view_model/list_product.dart';
 
 // ignore: must_be_immutable
 class MainPageMobile extends StatelessWidget {
   var controller = Get.put(Controller());
+  var authController = Get.put(AuthController());
   String? name;
   String? imageProfile;
   TextEditingController searchText = TextEditingController();
@@ -43,7 +44,7 @@ class MainPageMobile extends StatelessWidget {
                 style: GoogleFonts.poppins(color: Colors.black),
               );
             } else if (snapshot.hasError) {
-              DataBaseServices().logoutAuth(false);
+              authController.logoutAuth(false);
             }
             return const Text('No Name');
           },
@@ -71,7 +72,7 @@ class MainPageMobile extends StatelessWidget {
                       height: 70,
                       child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  DataBaseServices().logoutAuth(false);
+                  authController.logoutAuth(false);
                 }
                 return const SizedBox(
                     width: 70, height: 70, child: CircularProgressIndicator());

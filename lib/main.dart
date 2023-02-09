@@ -5,10 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:ice_mobile/splash.dart';
 import 'package:oktoast/oktoast.dart';
-
-import 'service/database.dart';
+import 'controller/auth_controller.dart';
+import 'splash/splash.dart';
+import 'splash/splash_binding.dart';
 import 'view/home.dart';
 import 'view/login_mobile.dart';
 
@@ -18,6 +18,8 @@ Future<void> main() async {
   runApp(MyApp());
   configLoading();
 }
+
+var authController = Get.put(AuthController());
 
 void configLoading() {
   EasyLoading.instance
@@ -44,6 +46,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: Splash(),
         builder: EasyLoading.init(),
+        initialBinding: SplashBinding(),
       ),
     );
   }
@@ -62,7 +65,7 @@ class Check extends StatelessWidget {
       }
     } on FirebaseAuthException catch (e) {
       showToast(e.message!);
-      DataBaseServices().logoutAuth(false);
+      authController.logoutAuth(false);
     }
     return firebaseApp;
   }
@@ -93,11 +96,11 @@ class CheckStatus extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError) {
-          DataBaseServices().logoutAuth(false);
+          authController.logoutAuth(false);
           return LoginPageMobile();
         } else if (snapshot.hasData) {
           if (snapshot.data!['isDisable'] == false) {
-            DataBaseServices().logoutAuth(false);
+            authController.logoutAuth(false);
           } else {
             return MyHomePage();
           }
